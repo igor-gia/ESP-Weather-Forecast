@@ -1,4 +1,4 @@
-#include "HAL_Display.h"  // не убрать из-за меню и сообщений загрузки
+#include "HAL_Display.h"
 #include "Settings.h"
 #include "HAL_Net.h"
 #include "DateTime.h"
@@ -78,9 +78,9 @@ void setup() {
   initAPServer();
   drawString("WEB Server initialized.", 10, 130, F0, D_LEFT, COL_TEMP_NOW);
 
-  String statusWeather = "Weather server unavailable.";
+  String statusWeather = "Weather server (Met.no) unavailable.";
   if (initWeatherClient()) {
-      statusWeather = "Weather server available.";
+      statusWeather = "Weather server (Met.no) available.";
   }
   drawString(statusWeather, 10, 150, F0, D_LEFT, COL_TEMP_NOW);
 
@@ -152,8 +152,7 @@ void loop() {
     getWeatherData();
     currentWeatherOutside();   
     pendingForecastUpdate = true;       
-    //showForecast();          
-    menu.setMenuLine(4, "MET.no [Request: " + getDateDDMMYYYY() + " " + getTimeHHMM() + " / Updated: " + getDateDDMMYYYY(wd_meta_updated_at)+" " + getTimeHHMM(wd_meta_updated_at) + "]");
+    menu.setMenuLine(5, "MET.no [Request: " + getDateDDMMYYYY() + " " + getTimeHHMM() + " / Updated: " + getDateDDMMYYYY(wd_meta_updated_at)+" " + getTimeHHMM(wd_meta_updated_at) + "]");
   }
 
   if (!menu.isVisible() && !menu.isAnimating() && pendingForecastUpdate) {
