@@ -120,7 +120,7 @@ void loop() {
         forecastType = !forecastType;
         showForecast();
       }
-    } else if (t.x >= 640 && t.x <= 800 && t.y >= 441 && t.y <= 480) {
+    } else if (t.x >= BUTTON1_X && t.x <= BUTTON1_X + BUTTON1_W && t.y >= BUTTON1_Y && t.y <= BUTTON1_Y+BUTTON1_H) {
        if (!menu.isVisible() && !menu.isAnimating()) {
         // показать меню
         String CPUi = "CPU freq: "+  String(ESP.getCpuFreqMHz()) + " MHz";

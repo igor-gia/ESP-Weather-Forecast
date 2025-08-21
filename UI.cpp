@@ -43,8 +43,8 @@ constexpr int ICON_FORECAST_Y = 302;
 constexpr int TEMP_FORECAST_Y = 390;
 
 constexpr int AUTHOR_X = 5;
-constexpr int AUTHOR_Y = 453;    // уточнять!
-constexpr int DATA_PROV_X = 450;
+constexpr int AUTHOR_Y = 446;    // уточнять!
+constexpr int DATA_PROV_X = 5;
 constexpr int DATA_PROV_Y = 460;    // уточнять!
 constexpr int INFO_X = 795;
 constexpr int INFO_Y = 453;    // уточнять!
@@ -62,12 +62,9 @@ void createMainScreen() {
   drawIconByName("label3", 300, 110);
   drawIconByName("label4", 500, 110);
 
-  drawString("Created by Igor Gimelfarb", AUTHOR_X, AUTHOR_Y, FSO9, D_LEFT, COL_AUTHOR, COL_BACKGROUND);
-  drawString("Data provided by MET Norway (met.no)", DATA_PROV_X, DATA_PROV_Y, F0, D_RIGHT, COL_DATA_PROV, COL_BACKGROUND);
-  
-  Button(640, 442, 155, 38, "Info/Setting", false);
-
-  //drawString("Info/Settings", INFO_X, INFO_Y, FSB12, D_RIGHT, COL_INFO, COL_BACKGROUND);
+  drawString("Created by Igor Gimelfarb", AUTHOR_X, AUTHOR_Y, F0, D_LEFT, COL_AUTHOR, COL_BACKGROUND);
+  drawString("Data provided by MET Norway (met.no)", DATA_PROV_X, DATA_PROV_Y, F0, D_LEFT, COL_DATA_PROV, COL_BACKGROUND);
+  Button(BUTTON1_X, BUTTON1_Y, BUTTON1_W, BUTTON1_H, "Info", false);
 }
 
 void showDateTime() {

@@ -21,6 +21,12 @@ constexpr uint16_t COL_MENU_BG           = 0x2104;
 constexpr uint16_t COL_MENU_TEXT         = 0xFFFF;
 constexpr uint16_t COL_BACKGROUND        = 0x0000;
 
+// положения и размеры кнопок
+constexpr uint16_t BUTTON1_X = 720;
+constexpr uint16_t BUTTON1_Y = 442;
+constexpr uint16_t BUTTON1_W = 75;
+constexpr uint16_t BUTTON1_H = 38;
+
 constexpr long intervalClock = 1000;  // 1 сек
 
 extern bool APMode;   // режим после перезагрузки. Если true - загрузка в режиме точки доступа
