@@ -12,7 +12,6 @@ enum class FontId {
     FreeMono9,
     FreeMonoBold9,
     FreeSansOblique9,
-    FreeSerifBoldItalic12,
     FreeSansBold24,
     FreeSans12,
     FreeSans18,
@@ -21,7 +20,6 @@ enum class FontId {
 
 // --- ENUM для выравнивания текста ---
 enum class Datum { Left, Right, Center };
-
 
 
 // --- Структура касания ---
@@ -60,7 +58,6 @@ inline constexpr FontId F7    = FontId::Font7;
 inline constexpr FontId FM9   = FontId::FreeMono9;
 inline constexpr FontId FMB9  = FontId::FreeMonoBold9;
 inline constexpr FontId FSO9  = FontId::FreeSansOblique9;
-inline constexpr FontId FSB12 = FontId::FreeSerifBoldItalic12;
 inline constexpr FontId FSB24 = FontId::FreeSansBold24;
 inline constexpr FontId FS12  = FontId::FreeSans12;
 inline constexpr FontId FS18  = FontId::FreeSans18;

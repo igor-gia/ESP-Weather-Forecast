@@ -1,7 +1,6 @@
 #include "weatherdata.h"
 #include "Settings.h"
-#include <WiFiClientSecure.h>   
-#include <HTTPClient.h>        
+#include "HAL_Net.h"
 #include <ArduinoJson.h>   // для разбора JSON
 
 // Время последнего обновления данных на сервере (properties.meta.updated_at)
@@ -31,47 +30,13 @@ String daily_symbol_code[8] = { "", "", "", "", "", "", "", "" };
 float  daily_temperature[8] = { NAN, NAN, NAN, NAN, NAN, NAN, NAN, NAN };
 String daily_forecast_time[8] = { "", "", "", "", "", "", "", "" };
 
-WiFiClientSecure client;
-HTTPClient https;
-
-bool initWeatherClient() {
-    client.setInsecure();    
-    updateWeatherUrl();      
-    if (!https.begin(client, weatherUrl)) {
-        Serial.println("Weather client init failed");
-        return false;
-    }
-    https.addHeader("User-Agent", userAgent);
-    return true;
-}
-
 void getWeatherData() {
-  int httpCode = https.GET();
-  if (httpCode <= 0) {
-    Serial.printf("Ошибка подключения: %s\n", https.errorToString(httpCode).c_str());
-    https.end();
-    return;
-  }
-
-  if (httpCode != HTTP_CODE_OK) {
-    Serial.printf("HTTP ошибка: %d\n", httpCode);
-    https.end();
-    return;
-  }
-
-  String payload = https.getString();
-  https.end();
-
-  // Для ускорения разбора и экономии памяти используем фильтр JSON
-  const size_t capacity = 80 * 1024; // 80 KB, с запасом
+  updateWeatherUrl();
+  const size_t capacity = 80 * 1024; // запас
   DynamicJsonDocument doc(capacity);
 
-  // Парсим JSON
-  DeserializationError error = deserializeJson(doc, payload);
-
-  if (error) {
-    Serial.print("Ошибка разбора JSON: ");
-    Serial.println(error.c_str());
+  if (!fetchJson(weatherUrl, doc, true, userAgent)) {
+    Serial.println("Ошибка получения или разбора JSON");
     return;
   }
 

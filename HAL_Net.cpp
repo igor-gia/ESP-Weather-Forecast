@@ -2,6 +2,8 @@
 #include <DNSServer.h>
 #include "HAL_Net.h"
 #include "Settings.h"
+#include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 
 static uint32_t lastWifiCheck = 0;
 static const uint32_t wifiCheckInterval = 5000; // каждые 5 сек проверка Wi-Fi
@@ -63,4 +65,38 @@ void wifiLoop() {
 
 void handleDNS() {
     dnsServer.processNextRequest();   // обёртка
+}
+
+// --- HTTP + JSON ---
+bool fetchJson(const String& url, DynamicJsonDocument& doc, bool useSecure, const String& userAgent) {
+    if (!wifiConnected()) return false;
+
+    HTTPClient http;
+    WiFiClientSecure clientSecure;
+    if (useSecure) clientSecure.setInsecure();
+
+    bool ok = useSecure ? http.begin(clientSecure, url) : http.begin(url);
+    if (!ok) return false;
+
+    if (userAgent.length()) {
+        http.addHeader("User-Agent", userAgent);
+    }
+
+    int httpCode = http.GET();
+    if (httpCode != HTTP_CODE_OK) {
+        Serial.printf("HTTP ошибка: %d\n", httpCode);
+        http.end();
+        return false;
+    }
+
+    String payload = http.getString();
+    http.end();
+
+    DeserializationError err = deserializeJson(doc, payload);
+    if (err) {
+        Serial.printf("Ошибка разбора JSON: %s\n", err.c_str());
+        return false;
+    }
+
+    return true;
 }

@@ -6,6 +6,7 @@
 #include "Utils.h"
 #include "UI.h"
 #include "APWebServer.h"
+#include "AirQualityData.h"
 
 MenuManager menu(800, 480, MenuManager::MENU_LINES * 20 + 88);
 
@@ -13,6 +14,7 @@ bool forecastType = true;         // true - почасовый прогноз / 
 bool pendingForecastUpdate;       // ожидание обновления прогноза (чтоб не мешать меню)
 unsigned long previousMillisClock;
 unsigned long previousMillislWeather = 0;
+unsigned long previousMillislAQ = 0;
 
 void setup() {
   Serial.begin(115200);
@@ -65,6 +67,7 @@ void setup() {
       }
     }
   }
+
   menu.begin();
   Serial.println("Menu initialized.");
   drawString("Menu initialized.", 10, 90, F0, D_LEFT, COL_TEMP_NOW);
@@ -78,36 +81,36 @@ void setup() {
   initAPServer();
   drawString("WEB Server initialized.", 10, 130, F0, D_LEFT, COL_TEMP_NOW);
 
-  String statusWeather = "Weather server (Met.no) unavailable.";
-  if (initWeatherClient()) {
-      statusWeather = "Weather server (Met.no) available.";
-  }
-  drawString(statusWeather, 10, 150, F0, D_LEFT, COL_TEMP_NOW);
-
   getWeatherData();
-  bool pendingForecastUpdate = true; 
-  drawString("Getting weather data.", 10, 170, F0, D_LEFT, COL_TEMP_NOW);
-  
+  pendingForecastUpdate = true; 
+  drawString("Getting weather data from (Met.no).", 10, 150, F0, D_LEFT, COL_TEMP_NOW);
+
+  station_uid = getNearestStation(latitude, longitude, distance);
+  if(station_uid != 0) updateStationData(station_uid);
+  drawString("Found nearest air quality station: " + station_name, 10, 170, F0, D_LEFT, COL_TEMP_NOW);
+
   String CPUi="CPU freq: "+  String(ESP.getCpuFreqMHz()) + " MHz";
   String Memi = "PSRAM: " + String((float)ESP.getPsramSize()/1024/1024, 1) + "/" + String((float)ESP.getFreePsram()/1024/1024, 1) + "MB RAM: " + String((float)ESP.getHeapSize()/1024, 2)  + "/" + String((float)ESP.getFreeHeap()/1024, 2)  + "kB";
 
-  drawString(CPUi, 10, 190, F0, D_LEFT, COL_TEMP_NOW);
-  drawString(Memi, 10, 210, F0, D_LEFT, COL_TEMP_NOW);
+  drawString(CPUi, 10, 210, F0, D_LEFT, COL_TEMP_NOW);
+  drawString(Memi, 10, 230, F0, D_LEFT, COL_TEMP_NOW);
   
   menu.setMenuLine(1, "Wi-Fi: " + getWiFiInfo());
   menu.setMenuLine(2, statusNTP);
   menu.setMenuLine(4, "Latitude: " + String(latitude, 6) + ", Longitude: " + String(longitude, 6));
-  menu.setMenuLine(5, statusWeather);
+  menu.setMenuLine(5, "MET.no [Request: " + getDateDDMMYYYY() + " " + getTimeHHMM() + " / Updated: " + getDateDDMMYYYY(wd_meta_updated_at)+" " + getTimeHHMM(wd_meta_updated_at) + "]");
+  menu.setMenuLine(6, "AQ station: " + station_name);
   menu.setMenuLine(7, CPUi);
   menu.setMenuLine(8, Memi);
   
-  drawString("Starting application.", 10, 230, F0, D_LEFT, COL_TEMP_NOW);
+  drawString("Starting application.", 10, 250, F0, D_LEFT, COL_TEMP_NOW);
 
   delay(3000);
 
   createMainScreen();
   showDateTime();
   currentWeatherOutside();
+  showAirQuality();
   showForecast(); 
 }
 
@@ -153,6 +156,14 @@ void loop() {
     currentWeatherOutside();   
     pendingForecastUpdate = true;       
     menu.setMenuLine(5, "MET.no [Request: " + getDateDDMMYYYY() + " " + getTimeHHMM() + " / Updated: " + getDateDDMMYYYY(wd_meta_updated_at)+" " + getTimeHHMM(wd_meta_updated_at) + "]");
+  }
+
+  if (isDue(previousMillislAQ, intervalAQ)) {      //обновляем значения качества воздуха (раз в 15 мин) 
+    if(station_uid != 0) {
+      updateStationData(station_uid); 
+      showAirQuality();
+      menu.setMenuLine(6, "Air Quality value updated: " + getDateDDMMYYYY() + " " + getTimeHHMM());
+    }
   }
 
   if (!menu.isVisible() && !menu.isAnimating() && pendingForecastUpdate) {

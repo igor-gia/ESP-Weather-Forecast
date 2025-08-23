@@ -21,6 +21,13 @@ constexpr uint16_t COL_MENU_BG           = 0x2104;
 constexpr uint16_t COL_MENU_TEXT         = 0xFFFF;
 constexpr uint16_t COL_BACKGROUND        = 0x0000;
 
+constexpr uint16_t AQI_GOOD   = 0x07E0; // 0-50, зеленый
+constexpr uint16_t AQI_MOD    = 0xFFE0; // 51-100, желтый
+constexpr uint16_t AQI_USG    = 0xFC60; // 101-150, оранжевый
+constexpr uint16_t AQI_UNH    = 0xF820; // 101-150, оранжевый
+constexpr uint16_t AQI_VUH    = 0x9050; // 201-300, фиолетовый
+constexpr uint16_t AQI_HAZ    = 0x7804; // 301-500, бордовый
+
 // положения и размеры кнопок
 constexpr uint16_t BUTTON1_X = 720;
 constexpr uint16_t BUTTON1_Y = 442;
@@ -44,8 +51,14 @@ extern float latitude;
 extern float longitude;
 extern long intervalNTP;
 extern long intervalWeather;
+extern long intervalAQ;
 
 extern String weatherUrl;
+
+// Air Quality
+extern uint16_t distance; // в метрах
+extern const char* WAQI_token; // Токен WAQI
+extern const char* WAQI_URL; 
 
 // ----------------- Functions -----------------
 void loadSettings();

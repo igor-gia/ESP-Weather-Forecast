@@ -26,9 +26,16 @@ char userAgent[64] = "MyESP32WeatherClient/1.0 gia@gia.org.ua";
 
 // Интервал обновления
 long intervalWeather = 900000;    // 15 мин
+long intervalAQ      = 300000;    // 5 мин
 
 // URL погоды
 String weatherUrl;
+
+uint16_t distance = 4000; // в метрах
+
+// Токен WAQI
+const char* WAQI_token = "f2f660217e2212abd39712cb65e7a16ef65f8dea";   //  токен на aqicn.org
+const char* WAQI_URL = "https://api.waqi.info";
 
 // ----------------- Functions -----------------
 void updateWeatherUrl() {

@@ -1,7 +1,8 @@
 #include "UI.h"
-#include "DateTime.h"   // для получения времени
-#include "weatherdata.h" // для данных погоды
-#include "HAL_Display.h" // для вывода на экран
+#include "DateTime.h"        // для получения времени
+#include "weatherdata.h"     // для данных погоды
+#include "AirQualityData.h"  // для данных качества воздуха
+#include "HAL_Display.h"     // для вывода на экран
 #include "Settings.h"
 #include "Utils.h"
 
@@ -20,6 +21,10 @@ constexpr int CURTEMP_X = 215;
 constexpr int CURTEMP_Y = 10;
 constexpr int FLTEMP_X = 490;
 constexpr int FLTEMP_Y = 10;
+constexpr int AQI_X = 160;
+constexpr int AQI_Y = 77;
+constexpr int PM01_X = 235;
+constexpr int PM01_Y = 72;
 constexpr int HUM_X = 55;
 constexpr int HUM_Y = 125;
 constexpr int PRESS_X = 55;
@@ -38,9 +43,9 @@ constexpr int WIND_S_Y = 165;
 constexpr int HEADER_FORECAST_X = 400;
 constexpr int HEADER_FORECAST_Y = 228;  // уточнять!
 
-constexpr int D_T_FORECAST_Y = 270;
-constexpr int ICON_FORECAST_Y = 302;
-constexpr int TEMP_FORECAST_Y = 390;
+constexpr int D_T_FORECAST_Y = 272;
+constexpr int ICON_FORECAST_Y = 310;
+constexpr int TEMP_FORECAST_Y = 394;
 
 constexpr int AUTHOR_X = 5;
 constexpr int AUTHOR_Y = 446;    // уточнять!
@@ -54,6 +59,15 @@ extern bool forecastType;
 String prevTime = "";
 String prevDate = "";
 
+uint16_t getAQIColor(int cur_aqi) {
+  if (cur_aqi <= 50) return AQI_GOOD;
+  if (cur_aqi <= 100) return AQI_MOD;
+  if (cur_aqi <= 150) return AQI_USG;
+  if (cur_aqi <= 200) return AQI_UNH;
+  if (cur_aqi <= 300) return AQI_VUH;
+  return AQI_HAZ; // 301+
+}
+
 void createMainScreen() {
   fillScreen(COL_BACKGROUND);
 
@@ -65,6 +79,9 @@ void createMainScreen() {
   drawString("Created by Igor Gimelfarb", AUTHOR_X, AUTHOR_Y, F0, D_LEFT, COL_AUTHOR, COL_BACKGROUND);
   drawString("Data provided by MET Norway (met.no)", DATA_PROV_X, DATA_PROV_Y, F0, D_LEFT, COL_DATA_PROV, COL_BACKGROUND);
   Button(BUTTON1_X, BUTTON1_Y, BUTTON1_W, BUTTON1_H, "Info", false);
+
+  drawRoundRect(0, 212, 800, 228, 20, COL_FORECAST_ACTIVE);
+  drawRoundRect(1, 213, 798, 226, 19, COL_FORECAST_ACTIVE);
 }
 
 void showDateTime() {
@@ -93,7 +110,7 @@ void showDateTime() {
 void currentWeatherOutside() {
   drawIconByName(wd_current_symbol_code, 10, 10);
   // температура
-  fillRect (91, 4, 408, 107, COL_BACKGROUND);    // очистка экрана от старых данных
+  fillRect (91, 4, 408, 60, COL_BACKGROUND);    // очистка экрана от старых данных
   drawString(String(wd_current_temperature, 0)+" C", CURTEMP_X, CURTEMP_Y, FSB24, D_RIGHT, COL_TEMP_NOW, COL_BACKGROUND);
   showDegree (CURTEMP_X, CURTEMP_Y, COL_TEMP_NOW, COL_BACKGROUND, FSB24);
   drawString("Feels: " + String(calculateFeels(wd_current_temperature, wd_current_humidity, wd_current_wind_speed),0) + " C", FLTEMP_X, FLTEMP_Y, FSB24, D_RIGHT, COL_TEMP_FEELS, COL_BACKGROUND);
@@ -116,12 +133,25 @@ void currentWeatherOutside() {
   drawString(String(wd_current_wind_speed, (wd_current_wind_speed < 10) ? 1 : 0) + " m/s", WIND_S_X, WIND_S_Y, FS12, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
 }
 
+void showAirQuality() {
+  fillRect (95, 65, 404, 42, COL_BACKGROUND);    // очистка экрана от старых данных
+
+  uint16_t COL_AQI=getAQIColor(aqi);
+  fillRoundRect(AQI_X - 60, AQI_Y - 11, 120, 40, 8, COL_AQI);
+  drawString("AQI: " + String(aqi), AQI_X, AQI_Y, FS12, D_CENTER, COL_TEMP_NOW, COL_AQI);
+  drawString("PM01: " + String(pm1, 1), PM01_X, PM01_Y, F0, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
+  drawString("PM10: " + String(pm10, 1), PM01_X, PM01_Y + 10, F0, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
+  drawString("PM25: " + String(pm25, 1), PM01_X, PM01_Y + 20, F0, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
+
+  drawString("(ultrafine dust, exhaust gases)", PM01_X+70, PM01_Y, F0, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
+  drawString("(fine dust, smoke, smog)", PM01_X+70, PM01_Y + 10, F0, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
+  drawString("(coarse dust, pollen, sand)", PM01_X+70, PM01_Y + 20, F0, D_LEFT, COL_WEATHER_INFO, COL_BACKGROUND);
+
+
+}
 
 void showForecast() {
-  fillRect(0, 212, 800, 228, COL_BACKGROUND);   // очистка экрана от старых данных
-
-  drawRoundRect(0, 212, 800, 228, 20, COL_FORECAST_ACTIVE);
-  drawRoundRect(1, 213, 798, 226, 19, COL_FORECAST_ACTIVE);
+  fillRect(6, 222, 788, 208, COL_BACKGROUND);   // очистка экрана от старых данных
 
   drawString("Hourly Forecast", HEADER_FORECAST_X - 10, HEADER_FORECAST_Y, FSB18, D_RIGHT, forecastType ? COL_FORECAST_ACTIVE : COL_FORECAST_INACTIVE, COL_BACKGROUND);
   drawString("Daily Forecast", HEADER_FORECAST_X + 10, HEADER_FORECAST_Y, FSB18, D_LEFT, forecastType ? COL_FORECAST_INACTIVE : COL_FORECAST_ACTIVE, COL_BACKGROUND);
@@ -129,15 +159,16 @@ void showForecast() {
   for (int i = 0; i < 8; i++) {
     if (forecastType) {   
       // выводим прогноз почасовый
-      drawString(getTimeHHMM(hourly_forecast_time[i]), i * 100 + 88, D_T_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
+      drawString(getTimeHHMM(hourly_forecast_time[i]), i * 100 + 92, D_T_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
       drawIconByName(hourly_symbol_code[i], i * 100 + 10, ICON_FORECAST_Y);
-      drawString(String(hourly_temperature[i],0) + " C", i * 100 + 88, TEMP_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
+      drawString(String(hourly_temperature[i],0) + " C", i * 100 + 89, TEMP_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
+
       showDegree (i * 100 + 88, TEMP_FORECAST_Y, COL_FORECAST_ACTIVE, COL_BACKGROUND, FS18);
     } else {
       // выводим прогноз поденный
-      drawString(getWeekdayStr(daily_forecast_time[i], true), i * 100 + 88, D_T_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
+      drawString(getWeekdayStr(daily_forecast_time[i], true), i * 100 + 86, D_T_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
       drawIconByName(daily_symbol_code[i], i * 100 + 10, ICON_FORECAST_Y);
-      drawString(String(daily_temperature[i],0) + " C", i * 100 + 88, TEMP_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
+      drawString(String(daily_temperature[i],0) + " C", i * 100 + 89, TEMP_FORECAST_Y, FS18, D_RIGHT, COL_FORECAST_ACTIVE, COL_BACKGROUND);
       showDegree (i * 100 + 88, TEMP_FORECAST_Y, COL_FORECAST_ACTIVE, COL_BACKGROUND, FS18);
     }
   }

@@ -21,7 +21,6 @@ namespace {
         &fonts::FreeMono9pt7b,
         &fonts::FreeMonoBold9pt7b,
         &fonts::FreeSansOblique9pt7b,
-        &fonts::FreeSerifBoldItalic12pt7b,
         &fonts::FreeSansBold24pt7b,
         &fonts::FreeSans12pt7b,
         &fonts::FreeSans18pt7b,
