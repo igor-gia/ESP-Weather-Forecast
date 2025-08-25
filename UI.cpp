@@ -78,6 +78,7 @@ void createMainScreen() {
 
   drawString("Created by Igor Gimelfarb", AUTHOR_X, AUTHOR_Y, F0, D_LEFT, COL_AUTHOR, COL_BACKGROUND);
   drawString("Data provided by MET Norway (met.no)", DATA_PROV_X, DATA_PROV_Y, F0, D_LEFT, COL_DATA_PROV, COL_BACKGROUND);
+  Button(BUTTON2_X, BUTTON2_Y, BUTTON2_W, BUTTON2_H, "Disp Off", false);
   Button(BUTTON1_X, BUTTON1_Y, BUTTON1_W, BUTTON1_H, "Info", false);
 
   drawRoundRect(0, 212, 800, 228, 20, COL_FORECAST_ACTIVE);

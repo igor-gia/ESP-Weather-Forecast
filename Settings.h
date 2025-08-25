@@ -29,10 +29,15 @@ constexpr uint16_t AQI_VUH    = 0x9050; // 201-300, фиолетовый
 constexpr uint16_t AQI_HAZ    = 0x7804; // 301-500, бордовый
 
 // положения и размеры кнопок
-constexpr uint16_t BUTTON1_X = 720;
+constexpr uint16_t BUTTON1_X = 700;
 constexpr uint16_t BUTTON1_Y = 442;
-constexpr uint16_t BUTTON1_W = 75;
+constexpr uint16_t BUTTON1_W = 100;
 constexpr uint16_t BUTTON1_H = 38;
+
+constexpr uint16_t BUTTON2_X = 595;
+constexpr uint16_t BUTTON2_Y = 442;
+constexpr uint16_t BUTTON2_W = 100;
+constexpr uint16_t BUTTON2_H = 38;
 
 constexpr long intervalClock = 1000;  // 1 сек
 

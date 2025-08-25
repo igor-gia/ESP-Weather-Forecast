@@ -3,16 +3,13 @@
 #include <cmath>
 #include <cstring>
 #include "HAL_Display.h"
-#include "pins.h"
 #include "icons.h"
-#include <ESP_IOExpander_Library.h>
 #include "Settings.h"
+#include "pins.h"
 
 namespace HAL_Display {
 
 LGFX gfx;  // глобальный объект дисплея внутри HAL
-
-static esp_expander::CH422G* expander = nullptr;
 
 namespace {
     const lgfx::IFont* fontTable[] = {
@@ -43,23 +40,11 @@ namespace {
     constexpr int ICON_WIDTH  = 80;
     constexpr int ICON_HEIGHT = 80;
 
-    void ExpanderInit() {
-        expander = new esp_expander::CH422G(I2C_MASTER_SCL_IO, I2C_MASTER_SDA_IO, I2C_CH422G_ADDRESS);
-        expander->init();
-        expander->begin();
-        expander->enableAllIO_Output();
-
-        // Стартовые состояния
-        expander->digitalWrite(TP_RST, HIGH);
-        expander->digitalWrite(LCD_RST, HIGH);
-        expander->digitalWrite(LCD_BL, HIGH);
-        expander->digitalWrite(SD_CS, LOW);
-    }
 }
 
 // --- HAL функции ---
 void displayInit() {
-    ExpanderInit();
+    initCH422G();
     delay(500);
     gfx.init();
     gfx.setRotation(0);
@@ -67,10 +52,8 @@ void displayInit() {
     setBacklight(true);
 }
 
-void setBacklight(bool state) { if(expander) expander->digitalWrite(LCD_BL,state?HIGH:LOW); }
-void setPinHigh(uint8_t pin) { if(expander) expander->digitalWrite(pin,HIGH); }
-void setPinLow(uint8_t pin) { if(expander) expander->digitalWrite(pin,LOW); }
-bool readPin(uint8_t pin) { return expander ? expander->digitalRead(pin) : false; }
+void setBacklight(bool state) { if(state) gfx.setBrightness(255); else gfx.setBrightness(0);  }
+
 
 void drawString(const String& text, int x, int y, FontId font, Datum datum, uint16_t fgColor, uint16_t bgColor) {
     const lgfx::IFont* fnt = getFont(font);

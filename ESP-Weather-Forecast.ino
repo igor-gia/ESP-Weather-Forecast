@@ -12,6 +12,7 @@ MenuManager menu(800, 480, MenuManager::MENU_LINES * 20 + 88);
 
 bool forecastType = true;         // true - почасовый прогноз / false - ежедневный
 bool pendingForecastUpdate;       // ожидание обновления прогноза (чтоб не мешать меню)
+bool backLight = true;            // управление подсветкой экрана
 unsigned long previousMillisClock;
 unsigned long previousMillislWeather = 0;
 unsigned long previousMillislAQ = 0;
@@ -21,6 +22,8 @@ void setup() {
   delay(500);
   loadSettings();
   Serial.println("Loaded values from NVS.");
+
+  Serial.println("Expander CH422G initialized.");
   displayInit();
   Serial.println("Graphics initialized.");
   drawString("Booting...", 10, 10, F0, D_LEFT, COL_TEMP_NOW);
@@ -135,8 +138,9 @@ void loop() {
         // Спрятать меню
         menu.hide();
        }
-    } else if (t.x >= 500 && t.x <= 639 && t.y >= 441 && t.y <= 480) {
-      //Serial.println(backlightState);
+    } else if (t.x >= BUTTON2_X && t.x <= BUTTON2_X + BUTTON2_W && t.y >= BUTTON2_Y && t.y <= BUTTON2_Y+BUTTON1_H) {
+        backLight=!backLight;
+        setBacklight(backLight);
     }
   }
   wifiLoop();                            // проверка подключения Wi-Fi (каждые 5 сек)

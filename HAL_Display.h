@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string>
 
+
 namespace HAL_Display {
 
 // --- ENUM для шрифтов ---
@@ -31,9 +32,6 @@ struct TouchPoint {
 // --- Основные функции HAL (интерфейс, без зависимостей от LGFX) ---
 void displayInit();
 void setBacklight(bool state);
-void setPinHigh(uint8_t pin);
-void setPinLow(uint8_t pin);
-bool readPin(uint8_t pin);
 
 void drawString(const String& text, int x, int y, FontId font = FontId::Font0, Datum datum = Datum::Left, uint16_t fgColor = 0xFFFF, uint16_t bgColor = 0x0000);
 void drawRect(int x, int y, int w, int h, uint16_t color);
