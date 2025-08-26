@@ -120,13 +120,13 @@ void setup() {
 void loop() {
   TouchPoint t = getTouchDebounced();
   if (t.touched) {
-    if (t.x >= 0 && t.x <= 800 && t.y >= 212 && t.y <= 440) {
+    if (backLight && t.x >= 0 && t.x <= 800 && t.y >= 212 && t.y <= 440) {
       if (!menu.isVisible() && !menu.isAnimating()) {
         // меняем тип прогноза только при неактивном меню
         forecastType = !forecastType;
         showForecast();
       }
-    } else if (t.x >= BUTTON1_X && t.x <= BUTTON1_X + BUTTON1_W && t.y >= BUTTON1_Y && t.y <= BUTTON1_Y+BUTTON1_H) {
+    } else if (backLight && t.x >= BUTTON1_X && t.x <= BUTTON1_X + BUTTON1_W && t.y >= BUTTON1_Y && t.y <= BUTTON1_Y+BUTTON1_H) {
        if (!menu.isVisible() && !menu.isAnimating()) {
         // показать меню
         String CPUi = "CPU freq: "+  String(ESP.getCpuFreqMHz()) + " MHz";
@@ -138,11 +138,15 @@ void loop() {
         // Спрятать меню
         menu.hide();
        }
-    } else if (t.x >= BUTTON2_X && t.x <= BUTTON2_X + BUTTON2_W && t.y >= BUTTON2_Y && t.y <= BUTTON2_Y+BUTTON1_H) {
+    } else if (backLight && t.x >= BUTTON2_X && t.x <= BUTTON2_X + BUTTON2_W && t.y >= BUTTON2_Y && t.y <= BUTTON2_Y+BUTTON2_H) {
         backLight=!backLight;
+        setBacklight(backLight);
+    } else {
+        backLight=true;
         setBacklight(backLight);
     }
   }
+
   wifiLoop();                            // проверка подключения Wi-Fi (каждые 5 сек)
   if (timeLoop()) {
     menu.setMenuLine(2, "NTP updated: " + getDateDDMMYYYY() + " " + getTimeHHMM());

@@ -21,10 +21,10 @@ constexpr uint16_t COL_MENU_BG           = 0x2104;
 constexpr uint16_t COL_MENU_TEXT         = 0xFFFF;
 constexpr uint16_t COL_BACKGROUND        = 0x0000;
 
-constexpr uint16_t AQI_GOOD   = 0x07E0; // 0-50, зеленый
+constexpr uint16_t AQI_GOOD   = 0x03E0; // 0-50, зеленый
 constexpr uint16_t AQI_MOD    = 0xFFE0; // 51-100, желтый
 constexpr uint16_t AQI_USG    = 0xFC60; // 101-150, оранжевый
-constexpr uint16_t AQI_UNH    = 0xF820; // 101-150, оранжевый
+constexpr uint16_t AQI_UNH    = 0xF820; // 151-200, тёплый красно-оранжевый
 constexpr uint16_t AQI_VUH    = 0x9050; // 201-300, фиолетовый
 constexpr uint16_t AQI_HAZ    = 0x7804; // 301-500, бордовый
 
