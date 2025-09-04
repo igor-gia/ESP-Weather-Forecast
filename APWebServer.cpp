@@ -67,7 +67,7 @@ void handleSave() {
   longitude   = server.arg("longitude").toFloat();
   intervalWeather = server.arg("intervalWeather").toInt() * 60 * 1000UL; // минуты → мс
   
-  nightModeEnabled = server.hasArg("nightMode");
+  nightModeEnabled = server.hasArg("nightModeEnabled");
   if (nightModeEnabled) {
     // Если включён, обновляем значения времени
     strncpy(nightStart, server.arg("nightStart").c_str(), sizeof(nightStart));

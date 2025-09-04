@@ -38,7 +38,7 @@ const char* WAQI_token = "f2f660217e2212abd39712cb65e7a16ef65f8dea";   //  то�
 const char* WAQI_URL = "https://api.waqi.info";
 
 // Ночной режим
-bool nightModeEnabled = true;
+bool nightModeEnabled = false;
 char nightStart[6] = "23:00";
 char nightEnd[6]   = "07:30";
 
@@ -59,7 +59,7 @@ void loadSettings() {
     longitude = prefs.getFloat("longitude", longitude);
     intervalWeather = prefs.getLong("intervalWeather", intervalWeather);
     APMode = prefs.getBool("APMode", true);
-    nightModeEnabled = prefs.getBool("nightModeEnabled", true);
+    nightModeEnabled = prefs.getBool("nightMode", false);
     prefs.getString("nightStart", nightStart, sizeof(nightStart));
     prefs.getString("nightEnd", nightEnd, sizeof(nightEnd));
     prefs.end();
@@ -76,7 +76,7 @@ void saveSettings() {
     prefs.putFloat("longitude", longitude);
     prefs.putLong("intervalWeather", intervalWeather);
     prefs.putBool("APMode", APMode);
-    prefs.putBool("nightModeEnabled", nightModeEnabled);
+    prefs.putBool("nightMode", nightModeEnabled);
     prefs.putString("nightStart", nightStart);
     prefs.putString("nightEnd", nightEnd);
     prefs.end();
