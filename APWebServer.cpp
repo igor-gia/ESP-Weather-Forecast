@@ -31,6 +31,7 @@ void stopAPServer() {
 
 void handleRoot() {
   String page = FPSTR(htmlPage);
+  String disabledStr = nightModeEnabled ? "" : "disabled";
   page.replace("%SSID%", ssid);
   page.replace("%PASSWORD%", password);
   page.replace("%TZ%", tzString);
@@ -39,7 +40,11 @@ void handleRoot() {
   page.replace("%LON%", String(longitude, 6));
   unsigned long intervalMinutes = intervalWeather / 1000 / 60;  // переводим мс в минуты
   page.replace("%INTERVAL%", String(intervalMinutes));
-
+  if (nightModeEnabled) page.replace("%SLEEPEN%", "checked");
+    else page.replace("%SLEEPEN%", "");
+  page.replace("%NSTART%", nightStart);
+  page.replace("%NEND%", nightEnd);
+  page.replace("%DISABLED%", disabledStr);
   server.send(200, "text/html", page);
 }
 
@@ -61,6 +66,16 @@ void handleSave() {
   latitude    = server.arg("latitude").toFloat();
   longitude   = server.arg("longitude").toFloat();
   intervalWeather = server.arg("intervalWeather").toInt() * 60 * 1000UL; // минуты → мс
+  
+  nightModeEnabled = server.hasArg("nightMode");
+  if (nightModeEnabled) {
+    // Если включён, обновляем значения времени
+    strncpy(nightStart, server.arg("nightStart").c_str(), sizeof(nightStart));
+    nightStart[sizeof(nightStart)-1] = '\0';
+
+    strncpy(nightEnd, server.arg("nightEnd").c_str(), sizeof(nightEnd));
+    nightEnd[sizeof(nightEnd)-1] = '\0';
+}
 
   APMode=false;
   saveSettings();

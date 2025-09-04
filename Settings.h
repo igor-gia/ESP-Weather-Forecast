@@ -61,9 +61,13 @@ extern long intervalAQ;
 extern String weatherUrl;
 
 // Air Quality
-extern uint16_t distance; // в метрах
-extern const char* WAQI_token; // Токен WAQI
+extern uint16_t distance;       // в метрах
+extern const char* WAQI_token;  // Токен WAQI
 extern const char* WAQI_URL; 
+
+extern bool nightModeEnabled;
+extern char nightStart[6];
+extern char nightEnd[6];
 
 // ----------------- Functions -----------------
 void loadSettings();

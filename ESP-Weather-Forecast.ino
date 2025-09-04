@@ -8,11 +8,14 @@
 #include "APWebServer.h"
 #include "AirQualityData.h"
 
-MenuManager menu(800, 480, MenuManager::MENU_LINES * 20 + 88);
+MenuManager menu(800, 480, MenuManager::MENU_LINES * 20 + 68);
 
 bool forecastType = true;         // true - почасовый прогноз / false - ежедневный
 bool pendingForecastUpdate;       // ожидание обновления прогноза (чтоб не мешать меню)
 bool backLight = true;            // управление подсветкой экрана
+unsigned int nightStartMinutes;
+unsigned int nightEndMinutes;
+
 unsigned long previousMillisClock;
 unsigned long previousMillislWeather = 0;
 unsigned long previousMillislAQ = 0;
@@ -22,8 +25,10 @@ void setup() {
   delay(500);
   loadSettings();
   Serial.println("Loaded values from NVS.");
+  
+  nightStartMinutes = timeToMinutes(nightStart);
+  nightEndMinutes   = timeToMinutes(nightEnd);
 
-  Serial.println("Expander CH422G initialized.");
   displayInit();
   Serial.println("Graphics initialized.");
   drawString("Booting...", 10, 10, F0, D_LEFT, COL_TEMP_NOW);
@@ -93,18 +98,25 @@ void setup() {
   drawString("Found nearest air quality station: " + station_name, 10, 170, F0, D_LEFT, COL_TEMP_NOW);
 
   String CPUi="CPU freq: "+  String(ESP.getCpuFreqMHz()) + " MHz";
-  String Memi = "PSRAM: " + String((float)ESP.getPsramSize()/1024/1024, 1) + "/" + String((float)ESP.getFreePsram()/1024/1024, 1) + "MB RAM: " + String((float)ESP.getHeapSize()/1024, 2)  + "/" + String((float)ESP.getFreeHeap()/1024, 2)  + "kB";
+  String Memi = "PSRAM: " + String((float)ESP.getPsramSize()/1024/1024, 1) + "/" + String((float)ESP.getFreePsram()/1024/1024, 1) + "MB, RAM: " + String((float)ESP.getHeapSize()/1024, 2)  + "/" + String((float)ESP.getFreeHeap()/1024, 2)  + "kB";
 
   drawString(CPUi, 10, 210, F0, D_LEFT, COL_TEMP_NOW);
   drawString(Memi, 10, 230, F0, D_LEFT, COL_TEMP_NOW);
   
+  menu.setMenuLine(0, "Uptime: " + getUptimeString());
   menu.setMenuLine(1, "Wi-Fi: " + getWiFiInfo());
-  menu.setMenuLine(2, statusNTP);
+  menu.setMenuLine(3, statusNTP);
   menu.setMenuLine(4, "Latitude: " + String(latitude, 6) + ", Longitude: " + String(longitude, 6));
   menu.setMenuLine(5, "MET.no [Request: " + getDateDDMMYYYY() + " " + getTimeHHMM() + " / Updated: " + getDateDDMMYYYY(wd_meta_updated_at)+" " + getTimeHHMM(wd_meta_updated_at) + "]");
   menu.setMenuLine(6, "AQ station: " + station_name);
-  menu.setMenuLine(7, CPUi);
-  menu.setMenuLine(8, Memi);
+  String sleepMode;
+  if (nightModeEnabled) {
+    sleepMode = "Display will turn off at " + String(nightStart) + " and on at " + String(nightEnd);
+  } else {
+    sleepMode = "Sleep Mode: Disabled";
+  }
+  menu.setMenuLine(8, sleepMode);
+  menu.setMenuLine(9, CPUi + ", " + Memi);
   
   drawString("Starting application.", 10, 250, F0, D_LEFT, COL_TEMP_NOW);
 
@@ -130,9 +142,9 @@ void loop() {
        if (!menu.isVisible() && !menu.isAnimating()) {
         // показать меню
         String CPUi = "CPU freq: "+  String(ESP.getCpuFreqMHz()) + " MHz";
-        String Memi = "PSRAM: " + String((float)ESP.getPsramSize()/1024/1024, 1) + "/" + String((float)ESP.getFreePsram()/1024/1024, 1) + "MB RAM: " + String((float)ESP.getHeapSize()/1024, 2)  + "/" + String((float)ESP.getFreeHeap()/1024, 2)  + "kB";
-        menu.setMenuLine(7, CPUi);
-        menu.setMenuLine(8, Memi);
+        String Memi = "PSRAM: " + String((float)ESP.getPsramSize()/1024/1024, 1) + "/" + String((float)ESP.getFreePsram()/1024/1024, 1) + "MB, RAM: " + String((float)ESP.getHeapSize()/1024, 2)  + "/" + String((float)ESP.getFreeHeap()/1024, 2)  + "kB";
+        menu.setMenuLine(0, "Uptime: " + getUptimeString());
+        menu.setMenuLine(9, CPUi + ", " + Memi);
         menu.show();
        } else if (menu.isVisible() && !menu.isAnimating()) {
         // Спрятать меню
@@ -149,20 +161,23 @@ void loop() {
 
   wifiLoop();                            // проверка подключения Wi-Fi (каждые 5 сек)
   if (timeLoop()) {
-    menu.setMenuLine(2, "NTP updated: " + getDateDDMMYYYY() + " " + getTimeHHMM());
+    menu.setMenuLine(3, "NTP updated: " + getDateDDMMYYYY() + " " + getTimeHHMM());
   }
   
   handleAPServer();                      // Слушаем WEB-сервер  
   menu.update();                         // Обновляем анимацию меню, если она идёт
 
   if (isDue(previousMillisClock, intervalClock)) {           //обновляем дату и время и выводим их на экран с периодичностью intervalClock (1 сек)
+    unsigned int currentTimeMinutes = timeToMinutes(getTimeHHMM().c_str());
+    backLight = updateNightMode(backLight, currentTimeMinutes, nightStartMinutes, nightEndMinutes, nightModeEnabled);
+    setBacklight(backLight);
     showDateTime();
   }
 
   if (isDue(previousMillislWeather, intervalWeather)) {      //обновляем значения погоды с сервера met.no (раз в 15 мин)
     getWeatherData();
     currentWeatherOutside();   
-    pendingForecastUpdate = true;       
+    pendingForecastUpdate = true;
     menu.setMenuLine(5, "MET.no [Request: " + getDateDDMMYYYY() + " " + getTimeHHMM() + " / Updated: " + getDateDDMMYYYY(wd_meta_updated_at)+" " + getTimeHHMM(wd_meta_updated_at) + "]");
   }
 

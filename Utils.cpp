@@ -1,6 +1,11 @@
 #include "Utils.h"
 #include <cmath>              // для sin, cos, round
 
+bool nightMode = false;         // ночной режим
+bool lastNightMode = false;
+bool autoNightMode = false;     // запоминаем предыдущее состояние
+bool prevAutoNightMode = false; // Предыдущее значение autoNightMode
+
 
 bool isDue(unsigned long &previousMillis, unsigned long interval) {
   unsigned long currentMillis = millis();
@@ -60,4 +65,30 @@ float calculateFeels(float temperatureC, float humidity, float windSpeedMS) {
     }
     // --- Умеренная зона ---
     return calcTeff(temperatureC, humidity, windSpeedMS);
+}
+
+// Функция переключения режимов день/ночь
+bool updateNightMode(bool backLight, unsigned int currentTimeMinutes, unsigned int nightStartMinutes, unsigned int nightEndMinutes, bool nightModeEnabled) {
+    static bool prevAutoNightMode = false;
+
+    bool autoNightMode = false;
+    if (nightModeEnabled) {
+        if (nightStartMinutes < nightEndMinutes) {
+            autoNightMode = (currentTimeMinutes >= nightStartMinutes && currentTimeMinutes < nightEndMinutes);
+        } else {
+            autoNightMode = (currentTimeMinutes >= nightStartMinutes || currentTimeMinutes < nightEndMinutes);
+        }
+    }
+
+    if (autoNightMode != prevAutoNightMode) {
+        prevAutoNightMode = autoNightMode;
+
+        if (autoNightMode) { // ночь
+            if (backLight) backLight = false;
+        } else {             // день
+            if (!backLight) backLight = true;
+        }
+    }
+
+    return backLight;
 }

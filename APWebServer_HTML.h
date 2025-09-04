@@ -24,18 +24,16 @@ const char htmlPage[] PROGMEM = R"rawliteral(
     min-width:100px;
     margin-right:8px;
   }
-  input[type="text"], input[type="password"], input[type="number"] {
+  input[type="text"], input[type="password"], input[type="number"], input[type="time"]{
     padding:6px;
     border:1px solid #ccc;
     border-radius:4px;
     box-sizing:border-box;
   }
 
-  /* Широкие поля для Wi-Fi и Time Settings */
   .input-wide { width:100%; }
-
-  /* Компактные поля для Weather Settings */
   .input-latlon { width:30%; }
+  .input-time   { width:18%; }
   .input-interval { width:18%; }
 
   input[type='submit'] { 
@@ -99,9 +97,48 @@ const char htmlPage[] PROGMEM = R"rawliteral(
       </div>
     </div>
 
+    <!-- Night mode -->
+    <div class="section">
+      <div class="section-title">Display Sleep Mode</div>
+        <div class="row">
+          <label for="nightMode">
+            <input type="checkbox" id="nightModeEnabled" name="nightModeEnabled" value="1" %SLEEPEN%> Enable Sleep Mode
+          </label>
+        </div>
+      <div class="row">
+        <label for="nightStart">Screen Off Time</label>
+        <input type="time" id="nightStart" name="nightStart" class="input-time" value="%NSTART%" step="60" %DISABLED%>
+      </div>
+      <div class="row">
+        <label for="nightEnd">Screen On Time</label>
+        <input type="time" id="nightEnd" name="nightEnd" class="input-time" value="%NEND%" step="60" %DISABLED%>
+      </div>
+    </div>
+
     <!-- Submit -->
     <input type="submit" value="Save & Reboot">
   </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nightCheckbox = document.getElementById('nightModeEnabled');
+    const nightStart = document.getElementById('nightStart');
+    const nightEnd   = document.getElementById('nightEnd');
+
+    function updateFields() {
+        const disabled = !nightCheckbox.checked;
+        nightStart.disabled = disabled;
+        nightEnd.disabled   = disabled;
+    }
+
+    // Инициализация при загрузке
+    updateFields();
+
+    // Обработчик клика по чекбоксу
+    nightCheckbox.addEventListener('change', updateFields);
+});
+</script>
+
 </body>
 </html>
 )rawliteral";

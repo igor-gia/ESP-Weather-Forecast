@@ -37,6 +37,12 @@ uint16_t distance = 4000; // в метрах
 const char* WAQI_token = "f2f660217e2212abd39712cb65e7a16ef65f8dea";   //  токен на aqicn.org
 const char* WAQI_URL = "https://api.waqi.info";
 
+// Ночной режим
+bool nightModeEnabled = true;
+char nightStart[6] = "23:00";
+char nightEnd[6]   = "07:30";
+
+
 // ----------------- Functions -----------------
 void updateWeatherUrl() {
     weatherUrl = "https://api.met.no/weatherapi/locationforecast/2.0/complete?lat=" + String(latitude, 6) + "&lon=" + String(longitude, 6);
@@ -53,6 +59,9 @@ void loadSettings() {
     longitude = prefs.getFloat("longitude", longitude);
     intervalWeather = prefs.getLong("intervalWeather", intervalWeather);
     APMode = prefs.getBool("APMode", true);
+    nightModeEnabled = prefs.getBool("nightModeEnabled", true);
+    prefs.getString("nightStart", nightStart, sizeof(nightStart));
+    prefs.getString("nightEnd", nightEnd, sizeof(nightEnd));
     prefs.end();
 }
 
@@ -66,7 +75,10 @@ void saveSettings() {
     prefs.putFloat("latitude", latitude);
     prefs.putFloat("longitude", longitude);
     prefs.putLong("intervalWeather", intervalWeather);
-    prefs.putBool("APMode", APMode); 
+    prefs.putBool("APMode", APMode);
+    prefs.putBool("nightModeEnabled", nightModeEnabled);
+    prefs.putString("nightStart", nightStart);
+    prefs.putString("nightEnd", nightEnd);
     prefs.end();
 }
 

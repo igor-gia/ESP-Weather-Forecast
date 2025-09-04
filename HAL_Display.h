@@ -74,7 +74,7 @@ using namespace HAL_Display;
 class MenuManager {
 public:
 
-    static constexpr int MENU_LINES = 9;    // количество строк меню (от 0 до 8)
+    static constexpr int MENU_LINES = 10;    // количество строк меню (от 0 до 9)
 
     MenuManager(int screenWidth, int screenHeight, int menuHeight);
 

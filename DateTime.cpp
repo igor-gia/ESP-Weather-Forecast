@@ -7,6 +7,9 @@ struct tm timeinfo = {};
 static unsigned long previousMillisTime = 0;
 constexpr unsigned long TIME_UPDATE_INTERVAL = 6UL * 60UL * 60UL * 1000UL; // 6 часов
 
+time_t bootTime = 0; //  время старта после NTP
+
+
 // --- Функция синхронизации времени ---
 bool checkNTP(unsigned long timeoutMs) {
     configTime(0, 0, ntpServer);  // синхронизация UTC
@@ -22,10 +25,27 @@ bool checkNTP(unsigned long timeoutMs) {
         delay(50);
     }
     timeinfo = t;  // обновляем глобальную структуру
+    bootTime = time(nullptr);  // время старта зафиксировано
     return true;
 }
 
+// Возвращает строку Uptime - времени с запуска устройства
+String getUptimeString() {
+  time_t now = time(nullptr);
+  time_t uptimeSec = now - bootTime;
 
+  unsigned long days    = uptimeSec / 86400;
+  unsigned long hours   = (uptimeSec % 86400) / 3600;
+  unsigned long minutes = (uptimeSec % 3600) / 60;
+
+  String uptime;
+
+  if (days > 0) uptime += String(days) + (days == 1 ? " day " : " days ");
+  if (hours > 0) uptime += String(hours) + (hours == 1 ? " hour " : " hours ");
+  uptime += String(minutes) + (minutes == 1 ? " minute" : " minutes");
+
+  return uptime;
+}
 
 
 void syncTime() {
@@ -91,6 +111,12 @@ String getTimeHHMM(const String& isoDate) {
   return String(buf);
 }
 
+//  Функция перевода "HH:MM" в минуты
+unsigned int timeToMinutes(const char* hhmm) {
+    int h = (hhmm[0] - '0') * 10 + (hhmm[1] - '0');
+    int m = (hhmm[3] - '0') * 10 + (hhmm[4] - '0');
+    return h * 60 + m;
+}
 
 // Получение даты DD/MM/YYYY
 String getDateDDMMYYYY(const String& isoDate) {
